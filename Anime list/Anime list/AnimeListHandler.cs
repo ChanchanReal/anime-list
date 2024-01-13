@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
 
 public class AnimeListHandler
 {
@@ -7,6 +8,9 @@ public class AnimeListHandler
     private readonly DataManager _dataManager;
     private readonly MALDataRetriever _dataRetriever;
     public List<Anime> animeList = new List<Anime>();
+    private const int idSpacing = -5;
+    private const int titleSpacing = -21;
+    private const int defaultSpacing = -17;
 
     public AnimeListHandler()
     {
@@ -23,14 +27,72 @@ public class AnimeListHandler
         DisplayDT();
         while (true)
         {
-            
             Menu();
-
         }
-        
     }
     public void Menu()
     {
+        DisplayChoice();
+        MenuChoice();
+    }
+    private void MenuChoice()
+    {
+        while (true)
+        {
+            string choice = Input("Enter choice: ");
+            switch (choice.ToUpper())
+            {
+                case "ADD":
+                case "1":
+                    AddAnime();
+                    break;
+
+                case "2":
+                case "DISPLAY":
+                    DisplayDT();
+                    break;
+
+                case "3":
+                case "SAVE":
+                    bool success = _dataManager.SaveAnimeList(animeList);
+                    Console.Clear();
+                    if (success) ColoredText("Data saved success.\n", ConsoleColor.Yellow);
+                    break;
+
+                case "4":
+                case "EDIT":
+                    Edit();
+                    break;
+
+                case "SEARCH":
+                case "5":
+                    string title = Input("Enter anime to search: ");
+                    Console.Clear();
+                    _dataRetriever.SearchAnime(title);
+                    break;
+
+                case "DISPLAYSEASONAL":
+                case "6":
+                    Console.Clear();
+                    _dataRetriever.DisplaySeasonalAnime();
+                    break;
+
+                case "SINGLEANIME":
+                    throw new NotImplementedException("Soon");
+
+                case "EXIT":
+                case "QUIT":
+                    Environment.Exit(0);
+                    break;
+
+                default:
+                    Console.WriteLine("Your input is not in the choice");
+                    continue;
+            }
+            break;
+        }
+    }
+    private void DisplayChoice() =>
         Console.WriteLine(@"Enter which choice you want
 1. Add anime
 2. Display datatable
@@ -38,54 +100,7 @@ public class AnimeListHandler
 4. Edit
 5. Search anime
 6. Display seasonal anime");
-        string choice = Input("Enter choice: ");
-        switch (choice.ToUpper())
-        {
-            case "ADD":
-            case "1":
-                AddAnime();
-                break;
 
-            case "2":
-            case "DISPLAY":
-                DisplayDT(); 
-                break;
-
-            case "3":
-            case "SAVE":
-                bool success = _dataManager.SaveAnimeList(animeList);
-                Console.Clear();
-                if (success) ColoredText("Data saved success.\n", ConsoleColor.Yellow);
-                break;
-
-            case "4":
-            case "EDIT":
-                Edit();
-                break;
-
-            case "SEARCH":
-            case "5":
-                string title = Input("Enter anime to search: ");
-                Console.Clear();
-                _dataRetriever.SearchAnime(title);
-                break;
-
-            case "DISPLAYSEASONAL":
-            case "6":
-                Console.Clear();
-                _dataRetriever.DisplaySeasonalAnime();
-                break;
-
-            case "SINGLEANIME":
-                throw new NotImplementedException("Soon");
-
-            case "EXIT":
-            case "QUIT":
-                Environment.Exit(0);
-                break;
-        }
-    }
-    
     public void AddAnime()
     {
         Anime anime = new Anime();
@@ -110,26 +125,31 @@ public class AnimeListHandler
             else
             {
                 property.SetValue(anime, ID);
-                Console.WriteLine(ID);
             }
         }
         animeList.Add(anime);
         dt.Rows.Add(anime.ID, anime.Title, anime.Episode, anime.Season, anime.Status, anime.Premiered, anime.Popularity);
     }
-
     private void DisplayDT()
     {
         Console.Clear();
+        DisplayColumn();
+        DisplayRows();
+    }
+    private void DisplayColumn()
+    {
         foreach (DataColumn column in dt.Columns)
         {
             if (column.ColumnName == "Title")
-                Console.Write($"{column.ColumnName,-21}");
+                Console.Write($"{column.ColumnName,titleSpacing}");
             else if (column.ColumnName == "ID")
-                        Console.Write($"{column.ColumnName, -5}");
-            else 
-                Console.Write($"{column.ColumnName, -17}");
-           
+                Console.Write($"{column.ColumnName,idSpacing}");
+            else
+                Console.Write($"{column.ColumnName,defaultSpacing}");
         }
+    }
+    private void DisplayRows()
+    {
         Console.WriteLine();
         Console.WriteLine("__________________________________________________________________________________________________________________");
 
@@ -191,9 +211,9 @@ public class AnimeListHandler
                                         property.SetValue(anime, num);
 
                                 }
-                                catch (FormatException)
+                                catch (FormatException ex)
                                 {
-                                    Console.WriteLine("You type a string or something try again.");
+                                    Console.WriteLine(ex);
                                 }
                             }
                         }
@@ -240,25 +260,25 @@ public class AnimeListHandler
     private void ColoredText(string txt, ConsoleColor color)
     {
         Console.ForegroundColor = color;
-        Console.Write($"{txt, -17}");
+        Console.Write($"{txt, defaultSpacing}");
         Console.ResetColor();
     }
     private void ColoredText(int txt, ConsoleColor color)
     {
         Console.ForegroundColor = color;
-        Console.Write($"{txt, -17}");
+        Console.Write($"{txt, defaultSpacing}");
         Console.ResetColor();
     }
     private void ColoredTextID(int txt, ConsoleColor color)
     {
         Console.ForegroundColor = color;
-        Console.Write($"{txt, -5}");
+        Console.Write($"{txt, idSpacing}");
         Console.ResetColor();
     }
     private void ColoredTextTitle(string txt, ConsoleColor color)
     {
         Console.ForegroundColor = color;
-        Console.Write($"{txt,-21}");
+        Console.Write($"{txt, titleSpacing}");
         Console.ResetColor();
     }
 }
