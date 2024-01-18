@@ -1,4 +1,5 @@
-﻿public class Anime
+﻿[Serializable]
+public class Anime
 {
     public int ID { get; set; }
     public string Title { get; set; }
@@ -7,7 +8,6 @@
     public string Status { get; set; }
     public string Premiered { get; set; }
     public int Popularity { get; set; }
-
     public Anime()
     {
 
