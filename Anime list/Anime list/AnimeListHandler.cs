@@ -1,25 +1,36 @@
 ﻿using System.Data;
 using System.Reflection;
-using System.Reflection.Metadata.Ecma335;
 
 public class AnimeListHandler
 {
+    #region Properties and Fields
+
     private DataTable dt = new DataTable();
+
+    // classes
     private readonly DataManager _dataManager;
     private readonly MALDataRetriever _dataRetriever;
+    private readonly AnimeUpdater _animeUpdater;
+
+    // anime list properties and fields
     public List<Anime> animeList = new List<Anime>();
     private const int idSpacing = -5;
     private const int titleSpacing = -21;
     private const int defaultSpacing = -17;
 
+    #endregion
+
+    #region Constructors
     public AnimeListHandler()
     {
         _dataManager = new DataManager(this);
         _dataRetriever = new MALDataRetriever(this);
+        _animeUpdater = new AnimeUpdater(this);
         SetDatatableColumn();
     }
-   
+    #endregion
 
+    #region Methods
     public void Start()
     {
         _dataManager.ReadAnimeData();
@@ -77,6 +88,12 @@ public class AnimeListHandler
                     _dataRetriever.DisplaySeasonalAnime();
                     break;
 
+                case "UPDATELIST":
+                case "7":
+                    _animeUpdater.Update();
+                    AddListToDT();
+                    break;
+
                 case "SINGLEANIME":
                     throw new NotImplementedException("Soon");
 
@@ -99,7 +116,8 @@ public class AnimeListHandler
 3. Save Data
 4. Edit
 5. Search anime
-6. Display seasonal anime");
+6. Display seasonal anime
+7. Update Popularity");
 
     public void AddAnime()
     {
@@ -132,6 +150,7 @@ public class AnimeListHandler
     }
     private void DisplayDT()
     {
+        AddListToDT();
         Console.Clear();
         DisplayColumn();
         DisplayRows();
@@ -155,13 +174,15 @@ public class AnimeListHandler
 
         foreach (DataRow row in dt.Rows)
         {
-            int ID = (int)row["ID"];
-            string Title = (string)row["Title"];
-            int Episode = (int)row["Episode"];
-            int Season = (int)row["Season"];
-            string Status = (string)row["Status"];
-            string Premiered = (string)row["Premiered"];
-            int Popularity = (int)row["Popularity"];
+            var (ID, Title, Episode, Season, Status, Premiered, Popularity) = (
+         (int)row["ID"],
+         (string)row["Title"],
+         (int)row["Episode"],
+         (int)row["Season"],
+         (string)row["Status"],
+         (string)row["Premiered"],
+         (int)row["Popularity"]
+         );
 
             ColoredTextID(ID, ConsoleColor.Cyan);
             ColoredTextTitle(Title, ConsoleColor.White);
@@ -193,7 +214,7 @@ public class AnimeListHandler
                     foreach (var property in properties)
                     {
                         Console.Write($"Edit {property.Name}? ");
-                        if (Console.ReadLine().ToLower() == "yes")
+                        if (Console.ReadLine()?.ToLower() == "yes")
                         {
                             if (property.PropertyType == typeof(string))
                             {
@@ -231,7 +252,7 @@ public class AnimeListHandler
 
         foreach (Anime anime in animeList)
         {
-            DataRow existingRow = dt.AsEnumerable().FirstOrDefault(row => row.Field<int>("ID") == anime.ID);
+            DataRow? existingRow = dt.AsEnumerable().FirstOrDefault(row => row.Field<int>("ID") == anime.ID);
 
             if (existingRow == null)
             dt.Rows.Add(anime.ID, anime.Title, anime.Episode, anime.Season, anime.Status, anime.Premiered, anime.Popularity);
@@ -249,7 +270,7 @@ public class AnimeListHandler
     {
         Console.Write(txt + " ");
         string? input = Console.ReadLine();
-        return input;
+        return input?? string.Empty;
     }
     private int Inputs(string txt)
     {
@@ -281,4 +302,5 @@ public class AnimeListHandler
         Console.Write($"{txt, titleSpacing}");
         Console.ResetColor();
     }
+    #endregion
 }

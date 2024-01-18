@@ -4,15 +4,22 @@ using System.Threading.Tasks;
 using HtmlAgilityPack;
 public class MALDataRetriever
 {
+    #region Properties and Fields
+
     private AnimeListHandler listHandler;
     private const string url = "https://myanimelist.net/";
 
+    #endregion
+
+    #region Constructor
     public MALDataRetriever(AnimeListHandler listHandler)
     {
         this.listHandler = listHandler;
     }
+    #endregion
 
-    public  void SearchAnime(string title)
+    #region Methods
+    public void SearchAnime(string title)
     {
         // convert title to searched data string
         // implementing able to check info of specific anime
@@ -79,6 +86,8 @@ public class MALDataRetriever
     /// <summary>
     /// Update the popularity in the anime list
     /// </summary>
+
+    [Obsolete("To do: Implement this method.", true)]
     public void UpdatePopularity()
     {
         
@@ -88,6 +97,8 @@ public class MALDataRetriever
     /// The goal of this method is search a single anime
     /// display info, popularity,episode,etc
     /// </summary>
+
+    [Obsolete("To do: Implement this method.", true)]
     public void SearchSingleAnime()
     {
 
@@ -119,4 +130,5 @@ public class MALDataRetriever
     {
         return inputStr.Replace(substring, string.Empty);
     }
+    #endregion
 }

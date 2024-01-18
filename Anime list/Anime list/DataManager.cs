@@ -5,6 +5,7 @@ public class DataManager
     private readonly string dataPath; 
     private readonly AnimeListHandler listHandler;
 
+    public DataManager() { }
     public DataManager(AnimeListHandler handler)
     {
         listHandler = handler;
@@ -44,19 +45,26 @@ public class DataManager
     public bool ReadAnimeData()
     {
         List<Anime>animes = new List<Anime>();
-        using (FileStream fileStream = File.Open(dataPath, FileMode.Open))
-        using (StreamReader sr = new StreamReader(fileStream))
+        try
         {
-            string line;
-            while (!sr.EndOfStream)
+            using (FileStream fileStream = File.Open(dataPath, FileMode.Open))
+            using (StreamReader sr = new StreamReader(fileStream))
             {
-                string token = sr.ReadLine();
-            
-                Anime? deserializedString = JsonSerializer.Deserialize<Anime>(token);
-                animes.Add(deserializedString);
+
+                while (!sr.EndOfStream)
+                {
+                    string? token = sr.ReadLine();
+
+                    Anime? deserializedString = JsonSerializer.Deserialize<Anime>(token);
+                    if (deserializedString != null)
+                        animes.Add(deserializedString);
+                }
             }
-        }
-        listHandler.animeList = animes;
+            listHandler.animeList = animes;
+            
+        } 
+        catch (ArgumentException) { }
+        catch ( DirectoryNotFoundException) { }
         return true;
     }
 }

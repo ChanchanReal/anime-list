@@ -9,4 +9,6 @@ using static System.Net.WebRequestMethods;
 
 AnimeListHandler animeList = new AnimeListHandler();
 animeList.Start();
+
+// unused
 public enum Status { Finished, Unwatched, On_Hold}
